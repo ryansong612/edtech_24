@@ -12,7 +12,9 @@ class Db:
         """
         This method is used to upsert vectors into the Pinecone index.
         :param vectors: A dictionary containing the vectors to be updated and inserted.
-                            Has the following format: {"id": name, "values": vector, "metadata": json}
+                        Has the following format: {"id": name,
+                                                   "values": vector,
+                                                   "metadata": json}
         :param namespace: The namespace under which the vectors should be updated and inserted
         :return: None
         """
@@ -35,3 +37,20 @@ class Db:
                                 top_k=top_k,
                                 include_values=include_values,
                                 include_metadata=include_metadata)
+
+    def delete(self, namespace: str, ids=None, metadata_filter=None) -> None:
+        """
+        This method is used to delete vectors from the Pinecone index.
+        Ids and metadata filter are mutually exclusive
+        :param namespace: The namespace under which the records are being deleted
+        :param ids: The name(s) of the records that are being deleted
+        :param metadata_filter: Can be used to find records to delete based on the metadata
+        :return: None
+        """
+        if ids is None and metadata_filter is None:
+            return
+        if ids is None:
+            ids = []
+        if metadata_filter is None:
+            metadata_filter = {}
+        self.index.delete(ids=ids, namespace=namespace, filter=metadata_filter)
