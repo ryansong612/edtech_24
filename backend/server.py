@@ -5,7 +5,6 @@ from embed_model import Model, calculate_similarity
 app = Flask(__name__)
 db = Db()
 model = Model()
-marked_sheets = {}
 tags = ["Object Oriented Programming", "Functional Programming", "Data Structures", "Algorithms",
         "Operating Systems", "Compilers", "Databases",
         "Web Development", "Machine Learning", "Networks and Communication",
@@ -128,7 +127,6 @@ def mark_sheet():
         update_student_portfolio(student_name, question_vector, incorrect)
         response_json["questions"].append(question)
 
-    marked_sheets[student_name] = response_json
     print(recommend_tags(student_name, 5))
     return response_json
     # except Exception as e:
