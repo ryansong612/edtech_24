@@ -204,9 +204,10 @@ def question_tags(question_vector: list[float]) -> list[str]:
                               vector=question_vector)
     matches = fetched_result['matches']
     valid_tags = []
+    match_threshold = 0.45
     for match in matches:
         print(match)
-        if match['score'] > 0.45:
+        if match['score'] > match_threshold:
             valid_tags.append(match['id'])
     return valid_tags
 
