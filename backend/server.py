@@ -172,7 +172,7 @@ def update_student_portfolio(student_name: str, question_vector: list[float], in
         "id": student_name,
         "values": updated_vector
     }]
-    db.index_info()
+    db.set_index("student")
     db.upsert(student_json, namespace="students")
     return
 
