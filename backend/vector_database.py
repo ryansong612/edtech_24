@@ -6,9 +6,9 @@ class Db:
         api_key = "6317f4f1-3bc5-43c7-865d-3170f57b169c"
         host = "https://qtags-aa8d656.svc.apw5-4e34-81fa.pinecone.io"
         self.pc = Pinecone(api_key=api_key, environment=host)
-        self.index = self.pc.Index("quickstart")
+        self.index = self.pc.Index("qtags")
 
-    def upsert(self, vectors: dict, namespace: str) -> None:
+    def upsert(self, vectors: list[dict], namespace: str) -> None:
         """
         This method is used to upsert vectors into the Pinecone index.
         :param vectors: A dictionary containing the vectors to be updated and inserted.

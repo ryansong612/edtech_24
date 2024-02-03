@@ -1,0 +1,5 @@
+pinecone-client==3.0.2
+flask==3.0.1
+tensorflow_hub==0.16.1
+tensorflow
+sklearn
