@@ -7,7 +7,7 @@
 
 .wrapper(v-if="loggedIn")
   .question-list
-  StudentSheet(:questions="currSheet.questions")
+  StudentSheet(:questions="currSheet.questions", :studentName="name")
 
 </template>
     

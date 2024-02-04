@@ -179,19 +179,19 @@ def mark_sheet():
     questions: [question-id: String, user-answer: String]
     """
     try:
-        db.set_index("qtags")
         response_json = {"questions": []}
         sheet = request.get_json()
         student_name = sheet["name"]
         # clear cache
         seen_questions[student_name] = []
         for question in sheet["questions"]:
+            db.set_index("qtags")
             question_text = question["question"]
             user_answer = question["user-answer"]
             # add to cache
             seen_questions[student_name].append(question_text)
             fetched_result = db.query(namespace="questions",
-                                      top_k=10,
+                                      top_k=1,
                                       id=question_text)
             metadata = fetched_result['matches'][0]['metadata']
             question_vector = fetched_result['matches'][0]['values']
@@ -208,7 +208,7 @@ def mark_sheet():
                 user_answer_embedding = model.generate_embeddings([user_answer])
                 correct_answer_embedding = model.generate_embeddings([correct_answer])
                 similarity = calculate_similarity(user_answer_embedding, correct_answer_embedding)
-                threshold = 0.7
+                threshold = 0.625
                 print(similarity)
                 if similarity > threshold:
                     question["status"] = "correct"

@@ -1,30 +1,24 @@
 <template>
   <ul>
     <li>
-      <router-link to="/home" active-class="active" @click="showTab('home')"><a href=""></a>New Generation</router-link>
+      <router-link to="/" active-class="active" @click="showTab('database')">Home</router-link>
     </li>
     <li>
-      <router-link to="/class" active-class="active" @click="showTab('class')">Class</router-link>
+      <router-link v-if="router.currentRoute.value.path.indexOf('student') == -1" to="/home" active-class="active" @click="showTab('home')"><a href=""></a>New Sheet</router-link>
     </li>
     <li>
-      <router-link to="/database" active-class="active" @click="showTab('database')">Database</router-link>
+      <router-link v-if="router.currentRoute.value.path.indexOf('student') == -1" to="/class" active-class="active" @click="showTab('class')">Class</router-link>
+    </li>
+    <li>
+      <router-link v-if="router.currentRoute.value.path.indexOf('student') == -1" to="/database" active-class="active" @click="showTab('database')">Database</router-link>
     </li>
   </ul>
 </template>
   
-<script>
-export default {
-    data() {
-      return {
-        activeTab: '',
-      }
-    },
-    methods: {
-      showTab(tab) {
-        this.activeTab = tab;
-      }
-    }
-  }
+<script setup>
+import { useRouter } from 'vue-router';
+const router = useRouter()
+
 </script>  
 
 <style scoped>

@@ -25,18 +25,8 @@ div(v-if="!done")
 div(v-if="done")
     .question-container(v-for="(question, index) in userAnswers" :key="index")
         h2 Question {{ index + 1 }}: {{ question.question }}
-        ul.options(v-if="question.type === 'MCQ'")
-            li(v-for="(choice, key) in question.choices" :key="key")
-                label(:for="`question_${index}_${key}`")
-                input(
-                type="radio"
-                :name="`question_${index}`"
-                :id="`question_${index}_${key}`"
-                :value="key"
-                :checked="question.choices[question.answer] === choice")
-                span {{ key }}) {{ choice }}
-        div(v-else)
-            p.answer Your Answer :: {{ question["user-answer"] }}
+        div
+            p.answer Your Answer ({{ question.status }}) : {{ question["user-answer"] }}
             p.answer Correct Answer: {{ question.answer }}
     
 </template>
@@ -44,7 +34,8 @@ div(v-if="done")
 <script setup>
 import { ref, defineProps } from 'vue';
         
-const props = defineProps(["questions"])
+const props = defineProps(["questions", "studentName"])
+console.log(props)
 const currIndex = ref(0)
 const userAnswers = ref(props.questions.map((question) => {
     return {
@@ -70,14 +61,18 @@ const submit = async () => {
         headers: {
         "Content-Type": "application/json; charset=UTF-8",
         },
-        body: JSON.stringify(userAnswers.value)
+        body: JSON.stringify({
+            questions: userAnswers.value,
+            name: props.studentName
+        })
     });
 
     const marked = await response.json()
-
     for (let i = 0; i < marked.questions.length; i++) {
         userAnswers.value[i].status = marked.questions[i].status
     }
+
+    done.value = true
 }
 </script>
         
@@ -98,6 +93,14 @@ h2, p {
   &:hover {
     background-color: darken(#2ecc71, 10%);
   }
+}
+
+.correct {
+    color: green;
+}
+
+.incorrect {
+    color: red;
 }
 
 #answer-box {
