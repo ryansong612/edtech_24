@@ -6,12 +6,12 @@
   .generator-form
     .form-group
       label(for="themes") Themes
-      select#themes
+      select#themes(v-model="selectedTheme")
         option(:value="theme") Select a theme
-        // Add more theme options here
+        option(v-for="theme in themes" :value="theme" :key="theme") {{ theme }}
     .form-group
       label(for="number-of-questions") Number of questing
-      input#number-of-questions(type="number" min="1")
+      input#number-of-questions(type="number" min="1" :value="numberOfQuestions" @input="numberOfQuestions = $event.target.value")
     .form-group
       .difficulty-label Difficulties
       .difficulty-options
@@ -25,9 +25,16 @@ import { useRouter } from 'vue-router';
 
 export default {
   setup() {
+    const themes = [
+      "Object Oriented Programming", "Functional Programming", "Data Structures", "Algorithms",
+      "Operating Systems", "Compilers", "Databases",
+      "Web Development", "Machine Learning", "Networks and Communication",
+      "Natural Language Processing", "Reinforcement Learning", "Robotics",
+      "Deep Learning", "Mathematics and Computer Science"
+    ];
     const difficulties = ['Easy', 'Medium', 'Hard', 'Insanely hard'];
     const selectedDifficulty = ref('Easy');
-    const theme = ref('');
+    const selectedTheme = ref('');
     const numberOfQuestions = ref(1);
     const router = useRouter();
 
@@ -36,16 +43,17 @@ export default {
     }
 
     function generate() {
-      // Trigger generation logic here
-      console.log(theme.value);
-      router.push({ name: 'Result', query: { theme: theme.value? theme.value : '(Theme)'}});
+      router.push({ name: 'Result', query: { theme: selectedTheme.value? selectedTheme.value : '(Theme)'}});
     }
 
     return {
+      themes,
+      selectedTheme,
       difficulties,
       selectedDifficulty,
       selectDifficulty,
-      generate
+      generate,
+      numberOfQuestions
     };
   }
 };

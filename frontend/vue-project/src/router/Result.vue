@@ -11,8 +11,10 @@ export default defineComponent({
     userText: String
   },
   setup() {
-    const questionsData = ref([
+    const students = ref([
       {
+        name: 'Yechuan Li',
+        questions: [{
           "question": "What is the capital of France?",
           "answer": "Paris",
           "type": "Short Answer"
@@ -51,16 +53,35 @@ export default defineComponent({
             "question": "What is the boiling point of water?",
             "answer": "100°C",
             "type": "Short Answer"
-      }
-    ]);
-    const students = ref([
-      {
-        name: 'Yechuan Li',
-        questions: questionsData
+      }]
       },
       {
         name: 'John Doe',
-        questions: questionsData
+        questions: [{
+            "question": "What is the boiling point of water?",
+            "answer": "100°C",
+            "type": "Short Answer"
+      },
+      {
+            "question": "What is the capital of France?",
+            "answer": "Paris",
+            "type": "Short Answer"
+      },
+      {
+            "question": "What is the largest planet in our Solar System?",
+            "answer": {
+                "A": "Earth",
+                "B": "Jupiter",
+                "C": "Mars",
+                "D": "Venus" 
+            },
+            "type": "MCQ"
+      },
+      {
+            "question": "What is the boiling point of water?",
+            "answer": "100°C",
+            "type": "Short Answer"
+      }]
       },
       // ... other students
     ]);
@@ -73,12 +94,9 @@ export default defineComponent({
     const currentStudent = computed(() => students.value[currentStudentIndex.value]);
 
     const saveAndAssign = () => {
-      // Logic for saving and assigning
-      if (textarea.value.trim() !== '') {
-        router.push({ name: 'Result', params: { userText: textarea.value } });
-      } else {
-        // Handle empty input error
-      }
+      // TODO: backend add to database
+
+      router.push({ name: 'Class' });
     };
 
     const previousStudent = () => {
@@ -100,12 +118,8 @@ export default defineComponent({
       theme,
       nextStudent,
       saveAndAssign,
+      length: students.value.length,
     };
-  },
-  methods: {
-    Save() {
-        console.log('Save');
-    },
   },
 });
 </script>
@@ -113,7 +127,10 @@ export default defineComponent({
 
 <template lang="pug">
 .sticky
-  .title Assigning coursework for (Themes)
+  .title
+    | Assigning 
+    span(style="text-decoration: underline;") {{theme}} 
+    |  coursework for 
   .second
     .user-card
       .user-name {{ currentStudent.name }}
@@ -121,13 +138,13 @@ export default defineComponent({
       // Component or HTML for the progress bar goes here
 
     button.download(@click="saveAndAssign") Save sheet and assigned
+.wrapper
+  button.navigation(@click="previousStudent" :class="{ 'disabled': currentStudentIndex === 0 }") Previous
+  button.navigation.right(@click="nextStudent" :class="{ 'disabled': currentStudentIndex === length - 1 }") Next
 
   .question-list
     Question(:questions="currentStudent.questions", :status="currentStudent.status")
 
-  .navigation
-    button(@click="previousStudent") Previous
-    button(@click="nextStudent") Next
 </template>
 
 <style scoped lang="scss">
@@ -157,8 +174,9 @@ export default defineComponent({
     align-items: center;
 
     .user-name {
-      font-size: 1.5rem;
+      font-size: 2rem;
       margin-right: 2rem;
+      color: white;
     }
 
     .user-info {
@@ -170,16 +188,40 @@ export default defineComponent({
     }
   }
 
-    button {
-      padding: 0.5rem 1rem;
-      margin-right: 1rem;
-      border: none;
-      border-radius: 0.3rem;
-      cursor: pointer;
+button {
+  padding: 1rem 1.5rem;
+  margin-right: 1rem;
+  border: none;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  font-size: 1.2em;
+    background-color: #3b7d56; // Blue background color
+    color: white;
+    font-weight: bold;
+}
 
-        background-color: #3b7d56; // Blue background color
-        color: white;
-        font-weight: bold;
-    }
-
+.wrapper {
+  position: relative;
+}
+.question-list {
+  margin: 0 8em;
+}
+.navigation {
+  position: sticky;
+  top: 60%;
+  background-color: #3b7d56; // Blue background color
+  color: white;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  &.disabled {
+    background-color: #555; // Darker color for disabled state
+    cursor: not-allowed;
+  }
+}
+.right {
+  left: 100em;
+} 
 </style>
