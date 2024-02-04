@@ -1,6 +1,6 @@
 <script>
 import Question from '@/components/Questions.vue'; 
-import { ref, computed, defineComponent } from 'vue';
+import { ref, computed, defineComponent, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 export default defineComponent({
@@ -11,49 +11,35 @@ export default defineComponent({
     userText: String
   },
   setup() {
+    const questionsData = ref([]);
+    const fetchQuestions = async () => {
+      try {
+        console.log("fetching");
+        const response = await fetch('http://127.0.0.1:5000/get-questions', {
+          method: 'POST',
+          headers: {
+            "Content-Type": "application/json; charset=UTF-8",
+          }
+        });
+        const data = await response.json();
+        let qs = []
+        for (var i = 0; i < data['questions'].length; i++) {
+          qs.push({'question': data['questions'][i]['question'],
+                   'answer': data['questions'][i]['answer'],
+                   'type': 'Short Answer'});
+        }
+        console.log(qs);
+        questionsData.value = qs;
+      } catch (error) {
+        console.error('Failed to fetch questions:', error);
+      }
+    };
+
+    onMounted(fetchQuestions);
     const students = ref([
       {
-        name: 'Yechuan Li',
-        questions: [{
-          "question": "What is the capital of France?",
-          "answer": "Paris",
-          "type": "Short Answer"
-      },
-      {
-          "question": "What is the largest planet in our Solar System?",
-          "answer": {
-              "A": "Earth",
-              "B": "Jupiter",
-              "C": "Mars",
-              "D": "Venus" 
-          },
-          "type": "MCQ"
-      },
-      {
-            "question": "What is the boiling point of water?",
-            "answer": "100°C",
-            "type": "Short Answer"
-      },
-      {
-            "question": "What is the capital of France?",
-            "answer": "Paris",
-            "type": "Short Answer"
-      },
-      {
-            "question": "What is the largest planet in our Solar System?",
-            "answer": {
-                "A": "Earth",
-                "B": "Jupiter",
-                "C": "Mars",
-                "D": "Venus" 
-            },
-            "type": "MCQ"
-      },
-      {
-            "question": "What is the boiling point of water?",
-            "answer": "100°C",
-            "type": "Short Answer"
-      }]
+        name: 'Ryan Song',
+        questions: questionsData
       },
       {
         name: 'John Doe',
@@ -69,12 +55,13 @@ export default defineComponent({
       },
       {
             "question": "What is the largest planet in our Solar System?",
-            "answer": {
+            "choices": {
                 "A": "Earth",
                 "B": "Jupiter",
                 "C": "Mars",
                 "D": "Venus" 
             },
+            "answer": "A",
             "type": "MCQ"
       },
       {
