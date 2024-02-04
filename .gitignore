@@ -160,3 +160,6 @@ cython_debug/
 .idea/
 venv
 saved_model/
+.vscode/
+.DS_Store
+node_modules/
