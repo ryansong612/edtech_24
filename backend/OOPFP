@@ -1,0 +1,74 @@
+{
+    "questions": [
+        {
+            "question": "What are the four main principles of Object Oriented Programming?",
+            "answer": "The four main principles of Object Oriented Programming are encapsulation, abstraction, inheritance, and polymorphism.",
+            "type": "Short Answer"
+        },
+        {
+            "question": "How does immutability in Functional Programming improve software design?",
+            "answer": "Immutability in Functional Programming improves software design by making code easier to reason about, reducing side effects, and enhancing concurrency handling.",
+            "type": "Short Answer"
+        },
+        {
+            "question": "What is a binary search tree in Data Structures?",
+            "answer": "A binary search tree is a data structure that organizes elements in a hierarchical manner, where each node has at most two children, with the left child less than the parent and the right child greater.",
+            "type": "Short Answer"
+        },
+        {
+            "question": "Can you explain polymorphism in Object Oriented Programming?",
+            "answer": "Polymorphism in Object Oriented Programming refers to the ability of different classes to respond to the same method call in different ways, enabling objects of different classes to be treated as objects of a common superclass.",
+            "type": "Short Answer"
+        },
+        {
+            "question": "What is a pure function in Functional Programming?",
+            "answer": "A pure function in Functional Programming is a function where the return value is determined only by its input values, without observable side effects or changes to state.",
+            "type": "Short Answer"
+        },
+        {
+            "question": "How do linked lists differ from arrays in Data Structures?",
+            "answer": "Linked lists differ from arrays in that they store elements non-contiguously in memory, with each element pointing to the next, allowing for efficient insertions and deletions, unlike arrays which have fixed size and contiguous storage.",
+            "type": "Short Answer"
+        },
+        {
+            "question": "What role does encapsulation play in Object Oriented Programming?",
+            "answer": "Encapsulation in Object Oriented Programming restricts direct access to some of an object's components, which is a means of bundling the data with the methods that operate on that data.",
+            "type": "Short Answer"
+        },
+        {
+            "question": "How do higher-order functions work in Functional Programming?",
+            "answer": "Higher-order functions in Functional Programming are functions that can take other functions as arguments or return them as results, facilitating function composition and functional abstractions.",
+            "type": "Short Answer"
+        },
+        {
+            "question": "What is the difference between deep and shallow copying in Object Oriented Programming?",
+            "answer": "Deep copying creates a new object and recursively copies all objects it references, while shallow copying creates a new object but does not recursively copy referenced objects, instead copying their references.",
+            "type": "Short Answer"
+        },
+        {
+            "question": "What is tail recursion in Functional Programming?",
+            "answer": "Tail recursion is a special case of recursion where the recursive call is the last operation in the function, allowing some compilers to optimize it into a loop to prevent stack overflow.",
+            "type": "Short Answer"
+        },
+        {
+            "question": "Explain the concept of queues in Data Structures.",
+            "answer": "A queue is a linear data structure that follows the First In, First Out (FIFO) principle, where elements are added to one end (rear) and removed from the other end (front).",
+            "type": "Short Answer"
+        },
+        {
+            "question": "What is method overloading in Object Oriented Programming?",
+            "answer": "Method overloading in Object Oriented Programming allows multiple methods in the same class to have the same name but different parameters, enabling different implementations based on the method signature.",
+            "type": "Short Answer"
+        },
+        {
+            "question": "What are monads in Functional Programming?",
+            "answer": "Monads in Functional Programming are a design pattern used to handle side effects, encapsulate values within a computational context, and chain operations in a sequence.",
+            "type": "Short Answer"
+        },
+        {
+            "question": "How does a stack differ from a queue in Data Structures?",
+            "answer": "A stack is a linear data structure that follows the Last In, First Out (LIFO) principle, allowing addition and removal of elements only from one end, unlike a queue which allows operations from both ends.",
+            "type": "Short Answer"
+        }
+    ]
+}

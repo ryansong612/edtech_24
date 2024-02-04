@@ -1,4 +1,4 @@
-from pinecone import Pinecone, QueryResponse
+from pinecone import Pinecone, QueryResponse, FetchResponse
 
 
 class Db:
@@ -86,3 +86,6 @@ class Db:
         :return: A dictionary containing information about the index
         """
         return self.index.describe_index_stats()
+
+    def fetch(self, ids: list[str], namespace: str) -> FetchResponse:
+        return self.index.fetch(ids=ids, namespace=namespace)
