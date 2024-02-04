@@ -17,6 +17,7 @@ seen_questions = {}
 assigned = {}
 assignments = {}
 
+
 def initialize_database():
     db.set_index("qtags")
     for tag in tags:
@@ -33,10 +34,12 @@ def unassign(student_name: str):
     del assigned[student_name]
     return
 
+
 def assign(student_name: str, questions: list[dict]):
     assignments[student_name] = questions
     assigned[student_name] = True
     return
+
 
 @app.route("/assignment-status", methods=["POST"])
 def assignment_status():
@@ -49,6 +52,7 @@ def assignment_status():
     else:
         return {"status": "assigned"}
 
+
 @app.route("/assign-to", methods=["POST"])
 def assign_to():
     assignment_json = request.get_json()
@@ -56,6 +60,7 @@ def assign_to():
     questions = assignment_json["questions"]
     assign(student_name, questions)
     return {"status": "success"}
+
 
 @app.route("/get-assignment", methods=["POST"])
 def get_assignment():
@@ -66,6 +71,7 @@ def get_assignment():
         # could either be marked or unmarked
         questions = assignments[student_name]
     return {"questions": questions}
+
 
 @app.route("/add-student", methods=["POST"])
 def add_student():
@@ -82,19 +88,18 @@ def add(name: str):
     }], namespace="students")
     return {"status": "success"}
 
+
 @app.route("/get-questions", methods=["GET", "POST"])
 @cross_origin()
 def get_questions():
     db.set_index("qtags")
-    fetched_result = db.query(vector=[0 for _ in range(512)], 
-                              namespace="questions", 
+    fetched_result = db.query(vector=[0 for _ in range(512)],
+                              namespace="questions",
                               top_k=100)
     res = []
     for match in fetched_result['matches']:
-        r = {}
-        r['question'] = match['id']
-        r['answer'] = match['metadata']['answer']
-        r['type'] = match['metadata']['type']
+        r = {'question': match['id'], 'answer': match['metadata']['answer'],
+             'type': match['metadata']['type']}
         res.append(r)
     print(res)
     return {"questions": res}
@@ -107,64 +112,57 @@ def add_questions():
 
     question: String, answer: String, difficulty: int, type: String, tags: Optional<Array<String>>
     """
-    try:
-        db.set_index("qtags")
-        questions_json = request.get_json()
-        questions = questions_json["questions"]
-        print (questions_json)
-        new_vectors = []
-        for question_json in questions:
-            question_text = question_json["question"]
-            question_type = question_json["type"]
-            if question_type == "Short Answer":
-                question_embedding = model.generate_embeddings(
-                    [question_text, question_json["answer"]])
-            elif question_type == "MCQ":
-                everything = [question_json["answer"][option] for option in question_json["answer"]]
-                everything.append(question_text)
-                question_embedding = model.generate_embeddings(everything)
+    db.set_index("qtags")
+    questions_json = request.get_json()
+    questions = questions_json["questions"]
+    print(questions_json)
+    new_vectors = []
+    for question_json in questions:
+        question_text = question_json["question"]
+        question_type = question_json["type"]
+        if question_type == "Short Answer":
+            question_embedding = model.generate_embeddings(
+                [question_text, question_json["answer"]])
+        elif question_type == "MCQ":
+            everything = [question_json["answer"][option] for option in question_json["answer"]]
+            everything.append(question_text)
+            question_embedding = model.generate_embeddings(everything)
 
-            metadata = {key: question_json[key] for key in question_json if key != "question"}
+        metadata = {key: question_json[key] for key in question_json if key != "question"}
 
-            metadata["tags"] = question_tags(question_embedding)
-            print(f"{question_text} {metadata['tags']}")
-            if metadata["tags"]:
-                new_vectors.append({
-                    "id": question_text,
-                    "values": question_embedding,
-                    "metadata": metadata
-                })
-        db.upsert(new_vectors, namespace="questions")
-        return new_vectors
+        metadata["tags"] = question_tags(question_embedding)
+        print(f"{question_text} {metadata['tags']}")
+        if metadata["tags"]:
+            new_vectors.append({
+                "id": question_text,
+                "values": question_embedding,
+                "metadata": metadata
+            })
+    db.upsert(new_vectors, namespace="questions")
+    return new_vectors
 
-    except Exception as e:
-        return {"status": "failure"}
-    
+
 @app.route("/generate-questions", methods=["POST"])
 def generate_questions():
     """
     Takes a request containing a list of tags and returns a list of questions
     """
-    try:
-        db.set_index("qtags")
-        request_json = request.get_json()
-        tag = request_json["tag"]
-        top_k = request_json["top_k"]
-        questions = []
-        fetched_result = db.query(namespace="questions", 
-                                  vector=[0 for _ in range(512)], 
-                                  metadata_filter={"tags": tag},
-                                  top_k=top_k)
-        for match in fetched_result['matches']:
-            questions.append({
-                "question": match['id'],
-                "answer": match['metadata']['answer'],
-                "type": match['metadata']['type']
-            })
-        return {"questions": questions}
-    except Exception as e:
-        print(e)
-        return {"status": "failure"}
+    db.set_index("qtags")
+    request_json = request.get_json()
+    tag = request_json["tag"]
+    top_k = request_json["top_k"]
+    questions = []
+    fetched_result = db.query(namespace="questions",
+                              vector=[0 for _ in range(512)],
+                              metadata_filter={"tags": tag},
+                              top_k=top_k)
+    for match in fetched_result['matches']:
+        questions.append({
+            "question": match['id'],
+            "answer": match['metadata']['answer'],
+            "type": match['metadata']['type']
+        })
+    return {"questions": questions}
 
 
 @app.route("/mark-sheet", methods=["POST"])
@@ -178,56 +176,49 @@ def mark_sheet():
     name: student name,
     questions: [question-id: String, user-answer: String]
     """
-    try:
-        response_json = {"questions": []}
-        sheet = request.get_json()
-        student_name = sheet["name"]
-        # clear cache
-        seen_questions[student_name] = []
-        for question in sheet["questions"]:
-            db.set_index("qtags")
-            question_text = question["question"]
-            user_answer = question["user-answer"]
-            # add to cache
-            seen_questions[student_name].append(question_text)
-            fetched_result = db.query(namespace="questions",
-                                      top_k=1,
-                                      id=question_text)
-            metadata = fetched_result['matches'][0]['metadata']
-            question_vector = fetched_result['matches'][0]['values']
-            correct_answer = metadata['answer']
-            question_type = metadata['type']
-            incorrect = 0
-            if question_type == "MCQ":
-                if user_answer == correct_answer:
-                    question["status"] = "correct"
-                else:
-                    question["status"] = "incorrect"
-                    incorrect = 1
-            elif question_type == "Short Answer":
-                user_answer_embedding = model.generate_embeddings([user_answer])
-                correct_answer_embedding = model.generate_embeddings([correct_answer])
-                similarity = calculate_similarity(user_answer_embedding, correct_answer_embedding)
-                threshold = 0.625
-                print(similarity)
-                if similarity > threshold:
-                    question["status"] = "correct"
-                else:
-                    question["status"] = "incorrect"
-                    incorrect = 1
-                question["score"] = similarity
-            update_student_portfolio(student_name, question_vector, incorrect)
-            response_json["questions"].append(question)
-
-        print(recommend_tags(student_name, 5))
-
-        # returns the marked sheet
-        unassign(student_name)
-        assignments[student_name] = response_json
-        return response_json
-    except Exception as e:
-        print(f"{e}")
-        return {"status": "failure"}
+    response_json = {"questions": []}
+    sheet = request.get_json()
+    student_name = sheet["name"]
+    # clear cache
+    seen_questions[student_name] = []
+    for question in sheet["questions"]:
+        db.set_index("qtags")
+        question_text = question["question"]
+        user_answer = question["user-answer"]
+        # add to cache
+        seen_questions[student_name].append(question_text)
+        fetched_result = db.query(namespace="questions",
+                                  top_k=1,
+                                  id=question_text)
+        metadata = fetched_result['matches'][0]['metadata']
+        question_vector = fetched_result['matches'][0]['values']
+        correct_answer = metadata['answer']
+        question_type = metadata['type']
+        incorrect = 0
+        if question_type == "MCQ":
+            if user_answer == correct_answer:
+                question["status"] = "correct"
+            else:
+                question["status"] = "incorrect"
+                incorrect = 1
+        elif question_type == "Short Answer":
+            user_answer_embedding = model.generate_embeddings([user_answer])
+            correct_answer_embedding = model.generate_embeddings([correct_answer])
+            similarity = calculate_similarity(user_answer_embedding, correct_answer_embedding)
+            threshold = 0.625
+            print(similarity)
+            if similarity > threshold:
+                question["status"] = "correct"
+            else:
+                question["status"] = "incorrect"
+                incorrect = 1
+            question["score"] = similarity
+        update_student_portfolio(student_name, question_vector, incorrect)
+        response_json["questions"].append(question)
+    # returns the marked sheet
+    unassign(student_name)
+    assignments[student_name] = response_json
+    return response_json
 
 
 @app.route("/generate-sheet", methods=["POST"])

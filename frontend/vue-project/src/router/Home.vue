@@ -1,7 +1,7 @@
 <template lang="pug">
 .home-page
   .intro-section
-      h1 Hi, this is quizGPT,
+      h1 Hi, this is LearnLoom.AI,
       p creating problem sheets tailored to every learner in your class.
   .generator-form
     .form-group

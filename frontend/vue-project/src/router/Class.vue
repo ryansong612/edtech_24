@@ -85,7 +85,7 @@ const users = ref([])
 
 const getStatuses = async () => {
   let newUsers = []
-  const names = ["Ryan Doe", "Ashwin Doe"]
+  const names = ["Ryan Doe", "Ashwin Doe", "Jane Doe"]
 
   for (name of names) {
       const response = await fetch('http://127.0.0.1:5000/assignment-status', {
