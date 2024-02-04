@@ -1,6 +1,11 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import Sheet from '@/components/Sheet.vue'
+
+
+const showAssignment = ref(false)
+const currSheet = ref({})
 
 const statusStyles = (status) => {
       const colors = {
@@ -11,6 +16,11 @@ const statusStyles = (status) => {
       };
       return colors[status]
     };
+
+const back = () => {
+  showAssignment.value = false
+  currSheet.value = {}
+}
 
 
 const sheetAction = async (user) => {
@@ -38,6 +48,36 @@ const sheetAction = async (user) => {
         users.value[i].status = "assigned"
       }
     }
+  }else if (user.status == "assigned") {
+    const response = await fetch('http://127.0.0.1:5000/get-assignment', {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json; charset=UTF-8",
+      },
+      body: JSON.stringify({
+        "name": user.name
+      })
+    });
+
+    const sheet = await response.json()
+
+    currSheet.value = sheet
+    showAssignment.value = true
+  }else if (user.status == "marked") {
+    const response = await fetch('http://127.0.0.1:5000/get-assignment', {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json; charset=UTF-8",
+      },
+      body: JSON.stringify({
+        "name": user.name
+      })
+    });
+
+    const sheet = await response.json()
+
+    currSheet.value = sheet.questions
+    showAssignment.value = true
   }
 }
 
@@ -73,7 +113,7 @@ await getStatuses()
 </script>
 
 <template lang="pug">
-.cards 
+.cards(v-if="!showAssignment") 
   .card(v-for="user in users"
     :key="user.name"
     :style="{ backgroundColor: statusStyles(user.status).background }" 
@@ -81,28 +121,24 @@ await getStatuses()
 
     h2 {{ user.name }}
     p.status(:style="{ color: statusStyles(user.status).text }") {{ user.status }}
-    //- .step-details
-    //-   .step-type
-    //-     | Technical review
-    //-   .step-deadline
-    //-     i.fa.fa-clock-o 
-    //-     |  Deadline in 6 days
-    //- aside.card-actions
-    //-   .btn.primary 
-    //-     i.fa.fa-edit
-    //-     |  Open document
-    //-   .btn.default
-    //-     i.fa.fa-info
-    //-     | View task details
-    //-   .btn.default
-    //-     i.fa.fa-file-pdf-o
-    //-     |  PDF preview
-    //-   .btn.default
-    //-     i.fa.fa-send
-    //-     |  Submit for review
+
+div(v-if="showAssignment")
+  button.button(@click="back()") Back
+  br
+  br
+  Sheet(:questions="currSheet.questions")
+
 </template>
 
 <style lang="scss" scoped>
+.button {
+  background-color: #2ecc71;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    margin-top: 1rem;
+}
 h2 {
   font-weight: 500;
   font-size: 20px;

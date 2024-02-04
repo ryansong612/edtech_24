@@ -1,5 +1,5 @@
 <template lang="pug">
-div(v-if="!done")
+div(v-if="!done && !marking")
     br
     h2 Question {{ currIndex + 1 }}
     br
@@ -18,9 +18,11 @@ div(v-if="!done")
                     :checked="question.choices[question.answer] === choice")
                     span {{ key }} {{ choice }}
     br
-    button.btn(@click="prevQuestion()", v-if="currIndex > 0") Back
-    button.btn(@click="nextQuestion()", v-if="currIndex < questions.length - 1") Next
-    button.btn(@click="submit()") Submit
+    button.btn(@click="prevQuestion()", v-if="currIndex > 0 && !marking") Back
+    button.btn(@click="nextQuestion()", v-if="currIndex < questions.length - 1 && !marking") Next
+    button.btn(@click="submit()", v-if="!marking") Submit
+br
+p(v-if="marking") Now marking your work...
 
 div(v-if="done")
     .question-container(v-for="(question, index) in userAnswers" :key="index")
@@ -45,7 +47,7 @@ const userAnswers = ref(props.questions.map((question) => {
     }
 }))
 const done = ref(false)
-
+const marking = ref(false)
 const nextQuestion = () => {
     currIndex.value += 1
     console.log(userAnswers.value)
@@ -56,6 +58,7 @@ const prevQuestion = () => {
 }
 
 const submit = async () => {
+   marking.value = true
    const response = await fetch('http://127.0.0.1:5000/mark-sheet', {
         method: 'POST',
         headers: {
@@ -73,6 +76,7 @@ const submit = async () => {
     }
 
     done.value = true
+    marking.value = false
 }
 </script>
         

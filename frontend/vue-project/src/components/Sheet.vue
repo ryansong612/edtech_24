@@ -11,7 +11,9 @@
                   :value="key"
                   :checked="question.choices[question.answer] === choice")
                 span {{ key }} {{ choice }}
-        p.answer(v-else) Answer: {{ question.answer }}
+        p.answer(v-if="question['user-answer']") Student Answer ({{ question["status"] }}) : {{  question["user-answer"] }}
+        p.answer(v-if="question['score']") Score : {{ question["score"] }}
+        p.answer(v-if="question.type != 'MCQ'") Answer: {{ question.answer }}
 </template>
         
 <script setup>

@@ -12,6 +12,9 @@
     .form-group
       label(for="number-of-questions") Number of questions
       input#number-of-questions(type="number" min="1" v-model="numberOfQuestions")
+    .form-group
+      label For student
+      input(v-model="studentName")
     button.generate-btn(@click="requestSheet()") Generate
 
 .wrapper
@@ -37,6 +40,7 @@ const themes = [
 const selectedTheme = ref("")
 const numberOfQuestions = ref(1)
 const currSheet = ref({})
+const studentName = ref("")
 
 const requestSheet = async () => {
   const topK = Number(numberOfQuestions.value)
@@ -64,7 +68,7 @@ const assignSheet = async () => {
       "Content-Type": "application/json; charset=UTF-8",
     },
     body: JSON.stringify({
-      "name": "Ryan Doe",
+      "name": studentName.value,
       "questions": currSheet.value.questions
     })
   });
