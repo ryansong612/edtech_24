@@ -2,10 +2,15 @@
 .question-container(v-for="(question, index) in questions" :key="index")
     h2 Question {{ index + 1 }}: {{ question.question }}
     ul.options(v-if="question.type === 'MCQ'")
-        li(v-for="(answer, key) in question.answer" :key="key")
+        li(v-for="(choice, key) in question.choices" :key="key")
             label(:for="`question_${index}_${key}`")
-            input(type="radio" :name="`question_${index}`" :id="`question_${index}_${key}`" :value="key")
-            span {{ key }}) {{ answer }}
+            input(
+              type="radio"
+              :name="`question_${index}`"
+              :id="`question_${index}_${key}`"
+              :value="key"
+              :checked="question.choices[question.answer] === choice")
+            span {{ key }}) {{ choice }}
     p.answer(v-else) Answer: {{ question.answer }}
     .minus(@click="removeQuestion(index)") ——
 
