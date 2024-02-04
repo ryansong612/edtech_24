@@ -14,7 +14,8 @@ tags = ["Object Oriented Programming", "Functional Programming", "Data Structure
         "Natural Language Processing", "Reinforcement Learning", "Robotics",
         "Deep Learning", "Mathematics and Computer Science"]
 seen_questions = {}
-
+assigned = {}
+assignments = {}
 
 def initialize_database():
     db.set_index("qtags")
@@ -27,6 +28,44 @@ def initialize_database():
     print("Database initialized")
     return
 
+
+def unassign(student_name: str):
+    del assigned[student_name]
+    return
+
+def assign(student_name: str, questions: list[dict]):
+    assignments[student_name] = questions
+    assigned[student_name] = True
+    return
+
+@app.route("/assignment-status", methods=["POST"])
+def assignment_status():
+    student_json = request.get_json()
+    student_name = student_json["name"]
+    if student_name not in assigned and student_name not in assignments:
+        return {"status": "unassigned"}
+    if student_name not in assigned and student_name in assignments:
+        return {"status": "marked"}
+    else:
+        return {"status": "assigned"}
+
+@app.route("/assign-to", methods=["POST"])
+def assign_to():
+    assignment_json = request.get_json()
+    student_name = assignment_json["name"]
+    questions = assignment_json["questions"]
+    assign(student_name, questions)
+    return {"status": "success"}
+
+@app.route("/get-assignment", methods=["POST"])
+def get_assignment():
+    assignment_json = request.get_json()
+    student_name = assignment_json["name"]
+    questions = ""
+    if student_name in assignments:
+        # could either be marked or unmarked
+        questions = assignments[student_name]
+    return {"questions": questions}
 
 @app.route("/add-student", methods=["POST"])
 def add_student():
@@ -72,6 +111,7 @@ def add_questions():
         db.set_index("qtags")
         questions_json = request.get_json()
         questions = questions_json["questions"]
+        print (questions_json)
         new_vectors = []
         for question_json in questions:
             question_text = question_json["question"]
@@ -97,6 +137,31 @@ def add_questions():
         db.upsert(new_vectors, namespace="questions")
         return new_vectors
 
+    except Exception as e:
+        return {"status": "failure"}
+    
+@app.route("/generate-questions", methods=["POST"])
+def generate_questions():
+    """
+    Takes a request containing a list of tags and returns a list of questions
+    """
+    try:
+        db.set_index("qtags")
+        request_json = request.get_json()
+        tag = request_json["tag"]
+        top_k = request_json["top_k"]
+        questions = []
+        fetched_result = db.query(namespace="questions", 
+                                  vector=[0 for _ in range(512)], 
+                                  metadata_filter={"tags": tag},
+                                  top_k=top_k)
+        for match in fetched_result['matches']:
+            questions.append({
+                "question": match['id'],
+                "answer": match['metadata']['answer'],
+                "type": match['metadata']['type']
+            })
+        return {"questions": questions}
     except Exception as e:
         print(e)
         return {"status": "failure"}
@@ -155,6 +220,10 @@ def mark_sheet():
             response_json["questions"].append(question)
 
         print(recommend_tags(student_name, 5))
+
+        # returns the marked sheet
+        unassign(student_name)
+        assignments[student_name] = response_json
         return response_json
     except Exception as e:
         print(f"{e}")
@@ -205,6 +274,7 @@ def generate_sheet():
         "questions": sheet_questions
     }
     seen_questions[student_name] = [question["question"] for question in sheet_questions]
+    assign(student_name, sheet_questions)
     return res
 
 

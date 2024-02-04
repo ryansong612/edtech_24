@@ -1,37 +1,75 @@
-<script>
-import { ref } from 'vue';
+<script setup>
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-export default {
-  name: 'Class',
-  setup() {
-    const users = [
-      { name: 'John Doe', status: 'assigned' },
-      { name: 'Jane Doe', status: 'unmarked' },
-      { name: 'John Smith', status: 'marked' },
-      { name: 'Ryan Doe', status: 'assigned' },
-      { name: 'Ryan Smith', status: 'unmarked' },
-      { name: 'Jane Song', status: 'marked' },
-    ];
-    const statusStyles = (status) => {
+
+const statusStyles = (status) => {
       const colors = {
-        assigned: { text: 'black', background: 'gray' },
-        unmarked: { text: 'white', background: 'orange' },
+        assigned: { text: 'black', background: 'orange' },
         marked: { text: 'white', background: 'green' },
+        unassigned: { text: "white", background: "grey" },
+        assigning: { text: "black", background: "yellow" }
       };
-      return colors[status] || colors['unassigned'];
+      return colors[status]
     };
 
-    const router = useRouter();
 
-    const navigateToViewQuestions = (user) => {
-      // Here you can pass any params you need, for example the user's name
-      console.log(user);
-      router.push({ name: 'ViewQuestions', query: { username: user.name, status: user.status }});
-    };
+const sheetAction = async (user) => {
+  if (user.status == "unassigned") {
+    for (let i = 0; i < users.value.length; i++) {
+      console.log(users.value[i])
+      if (users.value[i].name == user.name) {
+        users.value[i].status = "assigning"
+      }
+    }
 
-    return { users, statusStyles, navigateToViewQuestions };
+    const response = await fetch('http://127.0.0.1:5000/generate-sheet', {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json; charset=UTF-8",
+      },
+      body: JSON.stringify({
+        "name": user.name
+      })
+    });
+    
+    for (let i = 0; i < users.value.length; i++) {
+      console.log(users.value[i])
+      if (users.value[i].name == user.name) {
+        users.value[i].status = "assigned"
+      }
+    }
   }
-};
+}
+
+const users = ref([])
+
+const getStatuses = async () => {
+  let newUsers = []
+  const names = ["Ryan Doe", "Ashwin Doe"]
+
+  for (name of names) {
+      const response = await fetch('http://127.0.0.1:5000/assignment-status', {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json; charset=UTF-8",
+        },
+        body: JSON.stringify({
+          "name": name
+        })
+      });
+
+      const { status } = await response.json()
+      newUsers.push({
+        name,
+        status
+      })
+  }
+
+  users.value = newUsers
+  console.log(users.value)
+}
+
+await getStatuses()
 </script>
 
 <template lang="pug">
@@ -39,7 +77,7 @@ export default {
   .card(v-for="user in users"
     :key="user.name"
     :style="{ backgroundColor: statusStyles(user.status).background }" 
-    @click="navigateToViewQuestions(user)")
+    @click="sheetAction(user)")
 
     h2 {{ user.name }}
     p.status(:style="{ color: statusStyles(user.status).text }") {{ user.status }}

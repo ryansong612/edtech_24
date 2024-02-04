@@ -1,7 +1,7 @@
 <template>
-    <ul>
-      <li>
-        <router-link to="/" active-class="active" @click="showTab('home')"><a href=""></a>New Generation</router-link>
+  <ul>
+    <li>
+      <router-link to="/home" active-class="active" @click="showTab('home')"><a href=""></a>New Generation</router-link>
     </li>
     <li>
       <router-link to="/class" active-class="active" @click="showTab('class')">Class</router-link>
@@ -9,11 +9,11 @@
     <li>
       <router-link to="/database" active-class="active" @click="showTab('database')">Database</router-link>
     </li>
-    </ul>
-  </template>
+  </ul>
+</template>
   
-  <script>
-  export default {
+<script>
+export default {
     data() {
       return {
         activeTab: '',
@@ -25,7 +25,7 @@
       }
     }
   }
-  </script>  
+</script>  
 
 <style scoped>
 ul {

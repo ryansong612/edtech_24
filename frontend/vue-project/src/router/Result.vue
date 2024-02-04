@@ -40,38 +40,9 @@ export default defineComponent({
       {
         name: 'Ryan Song',
         questions: questionsData
-      },
-      {
-        name: 'John Doe',
-        questions: [{
-            "question": "What is the boiling point of water?",
-            "answer": "100°C",
-            "type": "Short Answer"
-      },
-      {
-            "question": "What is the capital of France?",
-            "answer": "Paris",
-            "type": "Short Answer"
-      },
-      {
-            "question": "What is the largest planet in our Solar System?",
-            "choices": {
-                "A": "Earth",
-                "B": "Jupiter",
-                "C": "Mars",
-                "D": "Venus" 
-            },
-            "answer": "A",
-            "type": "MCQ"
-      },
-      {
-            "question": "What is the boiling point of water?",
-            "answer": "100°C",
-            "type": "Short Answer"
-      }]
-      },
-      // ... other students
+      }
     ]);
+    
     const textarea = ref('');
     const route = useRoute();
     const router = useRouter();

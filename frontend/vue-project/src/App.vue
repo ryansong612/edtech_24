@@ -1,7 +1,8 @@
 <script setup>
 import SideBar from './components/Sidebar.vue';
 import { defineComponent } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
+const router = useRouter()
 
 defineComponent({
   components: {
@@ -11,10 +12,12 @@ defineComponent({
 </script>
 
 <template>
-  <SideBar/>
+  <SideBar v-if="router.currentRoute.value.path != '/'"/>
+  <Suspense>
   <main>
     <router-view/>
   </main>
+  </Suspense>
 </template>
 
 <style scoped>

@@ -12,52 +12,63 @@
               :checked="question.choices[question.answer] === choice")
             span {{ key }}) {{ choice }}
     p.answer(v-else) Answer: {{ question.answer }}
-    .minus(@click="removeQuestion(index)") ——
 
 .question-container.detail-view(v-if="isDetailedView")
   .section.difficulties
-    h3 Difficulties
-    .options
-      button.option(
-          v-for="difficulty in difficulties" 
-          :key="difficulty" 
-          :style="difficulty === selectedDifficulty ? selectedStyle : {}"
-          @click="selectDifficulty(difficulty)"
-        ) {{ difficulty }}
+    h3 Question
+    input(v-model="newQuestion")
   .section.question-types
-    h3 Questions type
-    .options
-      button.option(
-          v-for="type in questionTypes" 
-          :key="type" 
-          :style="difficulty === selectedQuestionType ? selectedStyle : {}"
-          @click="selectQuestionType(type)"
-        ) {{ type }}
-  .section.purposes
-    h3 Purpose
-    .options
-      button.option(
-          v-for="purpose in purposes" 
-          :key="purpose" 
-          :style="difficulty === selectedPurpose ? selectedStyle : {}"
-          @click="selectPurpose(purpose)"
-        ) {{ purpose }}
-  button.generate-button(@click="Generate()") Generate
+    h3 Answer
+    input(v-model="newAnswer")
+  button.generate-button(@click="addQuestion()") Add
 
 .question-container.add-question(v-else @click="toggleView") + Add a new Question +
 </template>
     
-<script>
-import { ref } from 'vue';
+<script setup>
+import { ref, defineProps } from 'vue';
+
+const props = defineProps(["questions"])
+
+const newQuestion = ref("")
+const newAnswer = ref("")
+const isDetailedView = ref(false);
+
+const addQuestion = async () => {
+  const questionJson = {
+          "question": newQuestion.value,
+          "answer": newAnswer.value,
+          "type": "Short Answer"
+        }
+  const response = await fetch("http://127.0.0.1:5000/add-questions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+    body: JSON.stringify({
+        "questions": [questionJson]
+    })
+  })
+
+  props.questions.push(questionJson)
+  toggleView()
+}
+
+const toggleView = () => {
+  isDetailedView.value = !isDetailedView.value;
+}
+
+/*
 export default {
     props: {
-    questions: Array
+      questions: Array
     },
   setup() {
-    const isDetailedView = ref(false);
     const selectedDifficulty = ref('Easy');
     const selectedQuestionType = ref('MCQ');
     const selectedPurpose = ref('Reinforcement');
+    const newQuestion = ref("asdsdadsadsa")
+    const newAnswer = ref("")
 
     const difficulties = ['Easy', 'Medium', 'Hard'];
     const questionTypes = ['Options', 'Shortanswers'];
@@ -101,13 +112,11 @@ export default {
         this.questions.splice(index, 1);
         },
         addQuestion() {
-        // Add new question logic here
-        },
-        Generate() {
-          console.log('Generate');
+          console.log(newQuestion.value)
         }
   }
 };
+*/
 </script>
 
 <style lang="scss" scoped>

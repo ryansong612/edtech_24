@@ -1,120 +1,185 @@
-<!-- <template lang="pug">
-.database-page
-    .header
-    h1 My database
-    .search-bar
-        input(type="search" placeholder="What are you looking for today?")
-        button.filter Filter
-        button.add +
-    .content 123
-    .entry(v-for="entry in entries" :key="entry.id")
-        .question {{ entry.question }}
-        .answer {{ entry.explanation }}
-        button.show-more Show more
-</template>
-  
-  <script>
-  export default {
-    setup() {
-        const database = ref([]);
-      return {
-        entries: [
-          // Replace with your actual data
-          {
-            id: 1,
-            question: "Explain the purpose of the NumPy function np.save().",
-            answer: "The np.save() function allows you to save NumPy arrays to disk. This is useful for persisting data between sessions.",
-            type: "Short Answer",
-          },
-          // More entries...
-        ]
-      };
-    }
-  };
-  </script>
-  
-  <style lang="scss" scoped>
-  .database-page {
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem;
-      background-color: #333;
-      color: white;
-  
-      h1 {
-        font-size: 2rem;
-      }
-  
-      .search-bar {
-        display: flex;
-        align-items: center;
-  
-        input {
-          padding: 0.5rem;
-          margin-right: 0.5rem;
-        }
-  
-        button {
-          padding: 0.5rem 1rem;
-          background-color: #2ecc71;
-          border: none;
-          color: white;
-          cursor: pointer;
-  
-          &:hover {
-            background-color: darken(#2ecc71, 10%);
+<script>
+import Question from '@/components/Questions.vue'; 
+import { ref, computed, defineComponent, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+
+export default defineComponent({
+  components: {
+    Question,
+  },
+  props: {
+    userText: String
+  },
+  setup() {
+    const questionsData = ref([]);
+    const fetchQuestions = async () => {
+      try {
+        console.log("fetching");
+        const response = await fetch('http://127.0.0.1:5000/get-questions', {
+          method: 'POST',
+          headers: {
+            "Content-Type": "application/json; charset=UTF-8",
           }
+        });
+        const data = await response.json();
+        let qs = []
+        for (var i = 0; i < data['questions'].length; i++) {
+          qs.push({'question': data['questions'][i]['question'],
+                   'answer': data['questions'][i]['answer'],
+                   'type': 'Short Answer'});
         }
-  
-        .add {
-          font-size: 1.5rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 2rem;
-          height: 2rem;
-          border-radius: 50%;
-        }
+        console.log(qs);
+        questionsData.value = qs;
+      } catch (error) {
+        console.error('Failed to fetch questions:', error);
       }
+    };
+
+    onMounted(fetchQuestions);
+    const students = ref([
+      {
+        name: 'Ryan Song',
+        questions: questionsData
+      }
+    ]);
+    
+    const textarea = ref('');
+    const route = useRoute();
+    const router = useRouter();
+    const theme = route.query.theme;
+
+    const currentStudentIndex = ref(0);
+    const currentStudent = computed(() => students.value[currentStudentIndex.value]);
+
+    const saveAndAssign = () => {
+      // TODO: backend add to database
+
+      router.push({ name: 'Class' });
+    };
+
+    const previousStudent = () => {
+      if (currentStudentIndex.value > 0) {
+        currentStudentIndex.value--;
+      }
+    };
+
+    const nextStudent = () => {
+      if (currentStudentIndex.value < students.value.length - 1) {
+        currentStudentIndex.value++;
+      }
+    };
+
+    return {
+      currentStudent,
+      previousStudent,
+      textarea,
+      theme,
+      nextStudent,
+      saveAndAssign,
+      length: students.value.length,
+    };
+  },
+});
+</script>
+
+
+<template lang="pug">
+.sticky
+  .second
+    .user-card
+      .user-name Question Bank
+.wrapper
+  .question-list
+    Question(:questions="currentStudent.questions", :status="currentStudent.status")
+
+
+.question-container.detail-view(v-if="isDetailedView")
+  .section.difficulties
+    h3 Question
+    input(v-model="newQuestion")
+  .section.question-types
+    h3 Answer
+    input(v-model="newAnswer")
+  button.generate-button(@click="addQuestion()") Add
+
+.question-container.add-question(v-else @click="toggleView") + Add a new Question +
+</template>
+
+<style scoped lang="scss">
+.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: #4a4a4a;
+  /* Blue background */
+  margin-bottom: 2em;
+  height: 25vh;
+  padding: 2em;
+}
+.second {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+  .title {
+    font-size: 2rem;
+    margin-bottom: 2em;
+  }
+
+  .user-card {
+    display: flex;
+    align-items: center;
+
+    .user-name {
+      font-size: 2rem;
+      margin-right: 2rem;
+      color: white;
     }
-  
-    .content {
-      .entry {
-        background-color: #222;
-        margin: 1rem;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        color: white;
-  
-        .question {
-          font-weight: bold;
-        }
-  
-        .code-snippet {
-          background-color: #333;
-          padding: 1rem;
-          margin: 1rem 0;
-          white-space: pre;
-          overflow-x: auto;
-        }
-  
-        .explanation {
-          font-style: italic;
-        }
-  
-        .show-more {
-          background: none;
-          border: none;
-          color: #27ae60;
-          cursor: pointer;
-        }
+
+    .user-info {
+      display: flex;
+
+      .average, .assigned, .progress {
+        margin-right: 2rem;
       }
     }
   }
-  </style>
-   -->
-   <template>
-    1213
-   </template>
+
+button {
+  padding: 1rem 1.5rem;
+  margin-right: 1rem;
+  border: none;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  font-size: 1.2em;
+    background-color: #3b7d56; // Blue background color
+    color: white;
+    font-weight: bold;
+}
+
+.wrapper {
+  position: relative;
+}
+.question-list {
+  margin: 0 8em;
+}
+.navigation {
+  position: sticky;
+  top: 60%;
+  background-color: #3b7d56; // Blue background color
+  color: white;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  &.disabled {
+    background-color: #555; // Darker color for disabled state
+    cursor: not-allowed;
+  }
+}
+.right {
+  left: 100em;
+} 
+</style>

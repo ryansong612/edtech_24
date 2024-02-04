@@ -12,6 +12,7 @@ class Model:
         model_url = "https://tfhub.dev/google/universal-sentence-encoder/4"
         self.model_url = model_url
         # self.module = hub.load(model_url)
+        # tf.saved_model.save(self.module, "../saved_model")
         self.module = tf.saved_model.load('../saved_model')
 
     def generate_embeddings(self, texts: list[str]) -> list[float]:
