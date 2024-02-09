@@ -327,6 +327,24 @@ def question_tags(question_vector: list[float]) -> list[str]:
     return valid_tags
 
 
+@app.route("/get-student-portfolio", methods=["POST"])
+def get_student_portfolio():
+    db.set_index("student")
+    request_json = request.get_json()
+    student_name = request_json["name"]
+    fetched_result = db.query(namespace="students", top_k=1, id=student_name)
+    if not fetched_result['matches']:
+        add(student_name)
+        return get_student_portfolio()
+    for match in fetched_result['matches']:
+        if match['id'] == student_name:
+            student_vector = fetched_result['matches'][0]['values']
+            student_tag_vector = [[student_vector[i], tags[i]] for i in range(len(tags))]
+            student_tag_vector.sort(key=lambda x: x[0], reverse=True)
+            return {"tags": student_tag_vector}
+
+
+
 if __name__ == "__main__":
     initialize_database()
     app.run(debug=True)
